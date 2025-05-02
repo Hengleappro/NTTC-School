@@ -1,1 +1,0 @@
-# NTTC-School
