@@ -16,9 +16,5 @@
   </template>
   
   <script setup>
-  const courses = [
-    { id: 1, title: 'Cisco', description: 'Learning Cisco.' },
-    { id: 2, title: 'Linux', description: 'Learning About Linux.' },
-  ];
+    const { data: courses } = await useFetch('http://localhost:3001/api/courses');
   </script>
-  

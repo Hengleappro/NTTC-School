@@ -13,14 +13,7 @@
   </template>
   
   <script setup>
-  const route = useRoute();
-  
-  const courses = [
-    { id: 1, title: 'Vue 3 Basics', description: 'Learn Vue from scratch.', lessons: ['Intro', 'Components', 'Reactivity'] },
-    { id: 2, title: 'Nuxt 3 Crash Course', description: 'Quickstart with Nuxt 3.', lessons: ['Setup', 'Pages & Routing', 'Deployment'] },
-    { id: 3, title: 'Tailwind CSS', description: 'Modern utility-first CSS.', lessons: ['Utility Classes', 'Customizing', 'Best Practices'] },
-  ];
-  
-  const course = courses.find(c => c.id === parseInt(route.params.id)) || {};
+    const route = useRoute();
+    const { data: course } = await useFetch(`http://localhost:3001/api/courses/${route.params.id}`);
   </script>
   
