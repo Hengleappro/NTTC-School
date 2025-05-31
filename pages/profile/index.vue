@@ -3,6 +3,7 @@ import type { IUser, AuthApiResponse } from '~/types'; // Adjust path if your ty
 
 const auth = useAuth();
 
+
 const { data: user, pending, error, refresh } = await useFetch<IUser | AuthApiResponse>('/api/auth/me', {
   // Optional: Set default value for data while pending, useful for initial SSR
   default: () => ({ name: 'Guest', email: 'Loading...' }) as IUser,
@@ -73,9 +74,9 @@ watchEffect(() => {
         <button @click="handleRefreshProfile" class="mt-6 px-5 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">
           Refresh Profile
         </button>
-        <NuxtLink to="/profile/edit" class="ml-4 px-5 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition duration-300">
+        <!-- <NuxtLink to="/profile/edit" class="ml-4 px-5 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition duration-300">
           Edit Profile
-        </NuxtLink>
+        </NuxtLink> -->
       </div>
     </div>
 

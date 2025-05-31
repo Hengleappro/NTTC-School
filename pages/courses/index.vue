@@ -1,13 +1,21 @@
-<!-- \pages\courses\index.vue -->
-
 <template>
   <div class="courses-page">
     <h1 class="font-bold text-center text-2xl mb-8 mt-12">Free Courses</h1>
     
-    <button @click="openModal(null)" class="mt-4 mb-6 px-4 py-2 bg-blue-500 text-white rounded ml-4 hover:bg-blue-800">New Course</button>
+    <button @click="openModal(null)" class="mt-4 mb-6 px-4 py-2 bg-blue-500 text-white rounded ml-4 hover:bg-blue-800" v-if="auth.isAdmin.value">New Course</button>
     
-    <div v-if="pending" class="text-center py-10">Loading courses...</div>
-    <div v-else-if="error" class="text-center py-10 text-red-600">Error loading courses: {{ error.message }}</div>
+    <div v-if="pending" class="text-center py-10">
+      <p class="text-lg text-gray-600">Loading courses...</p>
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mt-4"></div>
+    </div>
+    
+    <div v-else-if="error" class="text-center py-10 text-red-600">
+      <p class="text-red-600 text-lg">Error loading courses: {{ error.message }}</p>
+      <button @click="refresh" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        Try Again
+      </button>
+    </div>
+    
     <div v-else-if="courses && courses.length > 0" class="course-list">
       <div v-for="course in courses" :key="course._id" class="course-card">
         <img 
@@ -32,6 +40,7 @@
         </div>
       </div>
     </div>
+    
     <div v-else class="text-center py-10 text-gray-600">No courses available yet.</div>
 
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -46,12 +55,17 @@
             <label class="block mb-2 text-gray-600">Description</label>
             <textarea v-model="currentCourse.description" class="w-full p-2 border rounded" required></textarea>
           </div>
+          
           <div class="mb-4">
-            <label class="block mb-2 text-gray-600">Image URL</label>
+            <label class="block mb-2 text-gray-600">Image Upload</label>
+            <input type="file" @change="handleImageFileSelect" accept="image/*" class="w-full p-2 border rounded">
+            <p v-if="imageUploadError" class="text-red-500 text-sm mt-1">{{ imageUploadError }}</p>
+            <div v-if="uploadingImage" class="text-sm text-gray-500 mt-1">Uploading image...</div>
+            
+            <label class="block mb-2 text-gray-600 mt-4">Image URL (or use uploaded)</label>
             <img v-if="currentCourse.image" :src="currentCourse.image" class="w-32 h-32 object-cover rounded-md mb-2">
             <input v-model="currentCourse.image" type="text" placeholder="Enter image URL" class="w-full p-2 border rounded">
-            
-            </div>
+          </div>
 
           <div class="mb-4">
             <label class="block mb-2 text-gray-600">Duration (e.g., 8 hours)</label>
@@ -65,7 +79,6 @@
               <option value="Advanced">Advanced</option>
             </select>
           </div>
-
 
           <div class="flex justify-end space-x-2">
             <button @click="closeModal" type="button" class="px-4 py-2 bg-gray-300 hover:bg-gray-600 text-gray-800 hover:text-white rounded">Cancel</button>
@@ -91,42 +104,34 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'; // Removed watchEffect as it's not directly used in the simplified flow
-import { useAsyncData, useHead, useRuntimeConfig } from '#app'; // Import useRuntimeConfig
+import { ref } from 'vue';
+import { useAsyncData, useHead, useRuntimeConfig } from '#app';
 
-// Types for better clarity (optional, but good practice)
-/**
- * @typedef {Object} Course
- * @property {string} _id
- * @property {string} title
- * @property {string} image - Cloudinary URL
- * @property {string} description
- * @property {string} [duration]
- * @property {'Beginner' | 'Intermediate' | 'Advanced'} [level]
- * @property {Array} [lessons]
- */
+// Define a default placeholder image URL
+const DEFAULT_IMAGE_PLACEHOLDER = 'https://res.cloudinary.com/dfgegfg9c/image/upload/v1747680306/cdfbh5gywxw9dvh581v6.jpg';
 
 const { public: publicConfig } = useRuntimeConfig();
 const auth = useAuth();
+
 // --- State Management ---
 const showModal = ref(false);
 const showDeleteModal = ref(false);
 const currentCourse = ref({
-  _id: null, // Use _id for MongoDB documents
+  _id: null,
   title: '',
   description: '',
-  image: 'https://res.cloudinary.com/dfgegfg9c/image/upload/v1747680306/cdfbh5gywxw9dvh581v6.jpg', // Default placeholder image
+  image: DEFAULT_IMAGE_PLACEHOLDER, // Consistent default placeholder
   duration: '8 hours',
   level: 'Intermediate',
 });
 const courseToDeleteId = ref(null);
-const uploadingImage = ref(false); // Still keep this, though its usage will be minimal
-const imageUploadError = ref(null); // Still keep this, though its usage will be minimal
+const uploadingImage = ref(false);
+const imageUploadError = ref(null);
 
 // --- Fetch Courses ---
 const { data: courses, pending, error, refresh } = await useAsyncData(
-  'courses', // Unique key for this fetch operation
-  () => $fetch('/api/courses') // Your API endpoint
+  'courses',
+  () => $fetch('/api/courses')
 );
 
 // --- Head for page title ---
@@ -134,37 +139,37 @@ useHead({
   title: 'Courses | NTTC-School'
 });
 
-// --- Image Upload Logic (Temporarily commented out for testing) ---
-// async function handleImageFileSelect(event) {
-//   const file = event.target.files[0];
-//   if (!file) return;
+// --- Image Upload Logic ---
+async function handleImageFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-//   if (!file.type.startsWith('image/')) {
-//     imageUploadError.value = 'Please select an image file.';
-//     return;
-//   }
+  if (!file.type.startsWith('image/')) {
+    imageUploadError.value = 'Please select an image file.';
+    return;
+  }
 
-//   uploadingImage.value = true;
-//   imageUploadError.value = null;
+  uploadingImage.value = true;
+  imageUploadError.value = null;
 
-//   const formData = new FormData();
-//   formData.append('image', file);
+  const formData = new FormData();
+  formData.append('image', file);
 
-//   try {
-//     const response = await $fetch('/api/upload', {
-//       method: 'POST',
-//       body: formData,
-//     });
-//     currentCourse.value.image = response.url;
-//     console.log('Image uploaded successfully:', response.url);
-//   } catch (err) {
-//     console.error('Error uploading image:', err);
-//     imageUploadError.value = err.data?.statusMessage || 'Unknown error occurred during upload.';
-//     currentCourse.value.image = '';
-//   } finally {
-//     uploadingImage.value = false;
-//   }
-// }
+  try {
+    const response = await $fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    currentCourse.value.image = response.url;
+    console.log('Image uploaded successfully:', response.url);
+  } catch (err) {
+    console.error('Error uploading image:', err);
+    imageUploadError.value = err.data?.statusMessage || 'Unknown error occurred during upload.';
+    currentCourse.value.image = DEFAULT_IMAGE_PLACEHOLDER; // Revert to placeholder on error
+  } finally {
+    uploadingImage.value = false;
+  }
+}
 
 // --- Modal Actions ---
 function openModal(course) {
@@ -172,7 +177,7 @@ function openModal(course) {
     _id: null,
     title: '',
     description: '',
-    image: '', // Set default image for new course
+    image: DEFAULT_IMAGE_PLACEHOLDER, // Ensure new course gets default image
     duration: '8 hours',
     level: 'Intermediate',
   };
@@ -182,11 +187,11 @@ function openModal(course) {
 
 function closeModal() {
   showModal.value = false;
-  currentCourse.value = {
+  currentCourse.value = { // Reset currentCourse to initial state on close
     _id: null,
     title: '',
     description: '',
-    image: '', // Reset to default image on close
+    image: DEFAULT_IMAGE_PLACEHOLDER,
     duration: '8 hours',
     level: 'Intermediate',
   };
@@ -195,15 +200,16 @@ function closeModal() {
 
 // --- CRUD Operations ---
 async function saveCourse() {
-  // if (uploadingImage.value) { // This check is less relevant if file upload is commented out
-  //   alert('Please wait for the image to finish uploading.');
-  //   return;
-  // }
-  // Temporarily comment out the image required alert for new courses
-  // if (!currentCourse.value.image && currentCourse.value._id === null) {
-  //     alert('Thumbnail image is required for a new course.');
-  //     return;
-  // }
+  if (uploadingImage.value) {
+    alert('Please wait for the image to finish uploading.');
+    return;
+  }
+
+  // Optional: Add a check if an image is provided for new courses
+  if (!currentCourse.value.image && currentCourse.value._id === null) {
+      alert('Thumbnail image is required for a new course.');
+      return;
+  }
 
   try {
     if (currentCourse.value._id) {

@@ -1,7 +1,7 @@
 <template>
   <div
     class="min-h-screen flex items-center justify-center bg-cover bg-center"
-    :style="{ backgroundImage: 'url(/NTTC-background.jpg)' }"
+    :style="{ backgroundImage: 'url(/background.jpg)' }"
   > <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
 
     <div class="relative w-full max-w-md px-4">
