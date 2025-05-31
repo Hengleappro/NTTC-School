@@ -2,7 +2,7 @@
   <div class="courses-page">
     <h1 class="font-bold text-center text-2xl mb-8 mt-12">Free Courses</h1>
     
-    <button @click="openModal(null)" class="mt-4 mb-6 px-4 py-2 bg-blue-500 text-white rounded ml-4 hover:bg-blue-800" v-if="auth.isAdmin.value">New Course</button>
+    <button @click="openModal(null)" class="mt-4 mb-6 px-4 py-2 bg-blue-500 text-white rounded ml-4 hover:bg-blue-800" v-if="isAdmin">New Course</button>
     
     <div v-if="pending && !showModal && !showDeleteModal" class="text-center py-10">
       <p class="text-lg text-gray-600">Loading courses...</p>
@@ -34,8 +34,8 @@
             View Course
           </NuxtLink>
           <div>
-            <button @click="openModal(course)" class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded mr-2" v-if="auth.isAdmin.value">Edit</button>
-            <button @click="confirmDelete(course._id)" class="px-3 py-1 bg-red-500 hover:bg-red-700 text-white rounded" v-if="auth.isAdmin.value">Delete</button>
+            <button @click="openModal(course)" class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded mr-2" v-if="isAdmin">Edit</button>
+            <button @click="confirmDelete(course._id)" class="px-3 py-1 bg-red-500 hover:bg-red-700 text-white rounded" v-if="isAdmin">Delete</button>
           </div>
         </div>
       </div>
@@ -121,8 +121,7 @@ import { useAsyncData, useHead, useRuntimeConfig } from '#app';
 const DEFAULT_IMAGE_PLACEHOLDER = 'https://res.cloudinary.com/dfgegfg9c/image/upload/v1747680306/cdfbh5gywxw9dvh581v6.jpg';
 
 const { public: publicConfig } = useRuntimeConfig();
-const auth = useAuth(); // Assuming useAuth provides auth.isAdmin.value
-
+const { isAdmin, isLoggedIn } = useAuth();
 const showModal = ref(false);
 const showDeleteModal = ref(false);
 const currentCourse = ref({

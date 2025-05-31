@@ -42,7 +42,7 @@
                 <h2>Course Content</h2>
                 <p>{{ course.lessons.length }} lessons • {{ course.duration || '8 hours' }} total length</p>
               </div>
-              <button v-if="auth.isAdmin.value" @click="openAddLessonModal" class="add-lesson-btn"  >+ Add Lesson</button>
+              <button v-if="isAdmin" @click="openAddLessonModal" class="add-lesson-btn"  >+ Add Lesson</button>
             </div>
           </div>
           
@@ -64,8 +64,8 @@
                   <span class="duration">{{ lesson.duration || '45 min' }}</span>
                   <span v-if="lesson.free" class="free-badge">Free</span>
                   <div class="lesson-actions" v-if="isAdmin">
-                    <button @click.stop="editLesson(lesson)" class="edit-lesson-btn" v-if="auth.isAdmin.value">Edit</button>
-                    <button @click.stop="confirmDelete('lesson', lesson._id)" class="delete-lesson-btn" v-if="auth.isAdmin.value">Delete</button>
+                    <button @click.stop="editLesson(lesson)" class="edit-lesson-btn" v-if="isAdmin">Edit</button>
+                    <button @click.stop="confirmDelete('lesson', lesson._id)" class="delete-lesson-btn" v-if="isAdmin">Delete</button>
                   </div>
                 </div>
               </div>
@@ -159,11 +159,10 @@ import { useRoute, useRouter, useAsyncData, useHead } from '#app';
 
 const route = useRoute();
 const router = useRouter();
-const auth = useAuth();
+const { isAdmin, isLoggedIn } = useAuth();
 const courseId = route.params.id; // This will be the MongoDB _id
 
 // --- State Management ---
-const isAdmin = ref(true); // Set to true for now for testing admin features
 const showModal = ref(false);
 const showDeleteModal = ref(false);
 const deleteType = ref(''); // 'course' or 'lesson'

@@ -16,7 +16,7 @@
           <NuxtLink :to="`/courses/${courseId}`" class="back-link">
             &larr; Back to Course
           </NuxtLink>
-          <div class="admin-actions" v-if="auth.isAdmin.value" >
+          <div class="admin-actions" v-if="isAdmin" >
             <button @click="openEditModal" class="edit-btn">
               <span class="icon">✏️</span> Edit Lesson
             </button>
@@ -166,11 +166,10 @@ import { useRoute, useRouter, useAsyncData, useHead } from '#app';
 
 const route = useRoute();
 const router = useRouter();
-const auth = useAuth();
+const { isAdmin, isLoggedIn } = useAuth();
 // isAdmin should be managed by a proper authentication system.
 // For demonstration, it's set to true to display the admin buttons.
 // You'll replace this with actual authentication logic (e.g., checking a user role).
-const isAdmin = ref(true);
 
 const { id: courseId, lessonId } = route.params as { id: string, lessonId: string };
 
