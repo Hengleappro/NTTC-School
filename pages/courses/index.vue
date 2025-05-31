@@ -43,42 +43,45 @@
     
     <div v-else class="text-center py-10 text-gray-600">No courses available yet.</div>
 
-    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg p-6 max-w-md w-full">
-        <h2 class="text-xl font-bold mb-4 text-gray-900">{{ currentCourse._id ? 'Edit Course' : 'Add Course' }}</h2>
-        <form @submit.prevent="saveCourse">
-          <div class="mb-4">
-            <label class="block mb-2 text-gray-600">Title</label>
-            <input v-model="currentCourse.title" class="w-full p-2 border rounded" required>
-          </div>
-          <div class="mb-4">
-            <label class="block mb-2 text-gray-600">Description</label>
-            <textarea v-model="currentCourse.description" class="w-full p-2 border rounded" required></textarea>
+    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-24 pb-4 z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[85vh] overflow-y-auto"> 
+        <h2 class="text-xl font-bold mb-6 text-gray-900">{{ currentCourse._id ? 'Edit Course' : 'Add Course' }}</h2>
+        
+        <form @submit.prevent="saveCourse" class="space-y-4"> 
+          <div>
+            <label for="courseTitle" class="block mb-2 text-gray-700 font-medium">Title</label>
+            <input id="courseTitle" v-model="currentCourse.title" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
           </div>
           
-          <div class="mb-4">
-            
-            <label class="block mb-2 text-gray-600 mt-4">Image URL (or use uploaded)</label>
-            <img v-if="currentCourse.image" :src="currentCourse.image" class="w-32 h-32 object-cover rounded-md mb-2">
-            <input v-model="currentCourse.image" type="text" placeholder="Enter image URL" class="w-full p-2 border rounded">
+          <div>
+            <label for="courseDescription" class="block mb-2 text-gray-700 font-medium">Description</label>
+            <textarea id="courseDescription" v-model="currentCourse.description" rows="4" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none" required></textarea>
+          </div>
+          
+          <div>
+            <label for="imageUrl" class="block mb-2 text-gray-700 font-medium">Image URL</label>
+            <img v-if="currentCourse.image" :src="currentCourse.image" alt="Course Thumbnail" class="w-24 h-24 object-cover rounded-md mb-2 border border-gray-200">
+            <input id="imageUrl" v-model="currentCourse.image" type="text" placeholder="Enter image URL" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <p class="mt-1 text-sm text-gray-500">Paste a direct link to the course's thumbnail image.</p>
           </div>
 
-          <div class="mb-4">
-            <label class="block mb-2 text-gray-600">Duration (e.g., 8 hours)</label>
-            <input v-model="currentCourse.duration" class="w-full p-2 border rounded">
+          <div>
+            <label for="courseDuration" class="block mb-2 text-gray-700 font-medium">Duration (e.g., 8 hours)</label>
+            <input id="courseDuration" v-model="currentCourse.duration" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
           </div>
-          <div class="mb-4">
-            <label class="block mb-2 text-gray-600">Level</label>
-            <select v-model="currentCourse.level" class="w-full p-2 border rounded">
+          
+          <div>
+            <label for="courseLevel" class="block mb-2 text-gray-700 font-medium">Level</label>
+            <select id="courseLevel" v-model="currentCourse.level" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
               <option value="Beginner">Beginner</option>
               <option value="Intermediate">Intermediate</option>
               <option value="Advanced">Advanced</option>
             </select>
           </div>
 
-          <div class="flex justify-end space-x-2">
-            <button @click="closeModal" type="button" class="px-4 py-2 bg-gray-300 hover:bg-gray-600 text-gray-800 hover:text-white rounded">Cancel</button>
-            <button type="submit" :disabled="uploadingImage" class="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed">
+          <div class="flex justify-end space-x-2 pt-4 border-t border-gray-200">
+            <button @click="closeModal" type="button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition">Cancel</button>
+            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">
               {{ currentCourse._id ? 'Update' : 'Save' }}
             </button>
           </div>
@@ -91,8 +94,8 @@
         <h3 class="text-lg font-bold mb-2 text-gray-900">Confirm Delete</h3>
         <p class="mb-4 text-gray-600">Are you sure you want to delete this course?</p>
         <div class="flex justify-end space-x-2">
-          <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-300 hover:bg-gray-600 text-gray-800 hover:text-white rounded">Cancel</button>
-          <button @click="deleteCourse" class="px-4 py-2 bg-red-500 hover:bg-red-700 text-white rounded">Delete</button>
+          <button @click="showDeleteModal = false" type="button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancel</button>
+          <button @click="deleteCourse" type="button" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700">Delete</button>
         </div>
       </div>
     </div>
@@ -106,7 +109,6 @@
         <span class="text-xl font-medium text-gray-700">Loading Courses...</span>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -117,7 +119,8 @@ import { useAsyncData, useHead, useRuntimeConfig } from '#app';
 const DEFAULT_IMAGE_PLACEHOLDER = 'https://res.cloudinary.com/dfgegfg9c/image/upload/v1747680306/cdfbh5gywxw9dvh581v6.jpg';
 
 const { public: publicConfig } = useRuntimeConfig();
-const { isAdmin, isLoggedIn } = useAuth();
+const { isAdmin, isLoggedIn } = useAuth(); 
+
 const showModal = ref(false);
 const showDeleteModal = ref(false);
 const currentCourse = ref({
@@ -129,8 +132,6 @@ const currentCourse = ref({
   level: 'Intermediate',
 });
 const courseToDeleteId = ref(null);
-const uploadingImage = ref(false);
-const imageUploadError = ref(null);
 
 const { data: courses, pending, error, refresh } = await useAsyncData(
   'courses',
@@ -141,37 +142,6 @@ useHead({
   title: 'Courses | NTTC-School'
 });
 
-async function handleImageFileSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  if (!file.type.startsWith('image/')) {
-    imageUploadError.value = 'Please select an image file.';
-    return;
-  }
-
-  uploadingImage.value = true;
-  imageUploadError.value = null;
-
-  const formData = new FormData();
-  formData.append('image', file);
-
-  try {
-    const response = await $fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-    currentCourse.value.image = response.url;
-    console.log('Image uploaded successfully:', response.url);
-  } catch (err) {
-    console.error('Error uploading image:', err);
-    imageUploadError.value = err.data?.statusMessage || 'Unknown error occurred during upload.';
-    currentCourse.value.image = DEFAULT_IMAGE_PLACEHOLDER;
-  } finally {
-    uploadingImage.value = false;
-  }
-}
-
 function openModal(course) {
   currentCourse.value = course ? { ...course } : {
     _id: null,
@@ -181,7 +151,6 @@ function openModal(course) {
     duration: '8 hours',
     level: 'Intermediate',
   };
-  imageUploadError.value = null;
   showModal.value = true;
 }
 
@@ -195,15 +164,9 @@ function closeModal() {
     duration: '8 hours',
     level: 'Intermediate',
   };
-  imageUploadError.value = null;
 }
 
 async function saveCourse() {
-  if (uploadingImage.value) {
-    alert('Please wait for the image to finish uploading.');
-    return;
-  }
-
   if (!currentCourse.value.image || currentCourse.value.image === DEFAULT_IMAGE_PLACEHOLDER && currentCourse.value._id === null) {
       alert('Thumbnail image is required for a new course.');
       return;
