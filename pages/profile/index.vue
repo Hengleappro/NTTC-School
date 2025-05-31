@@ -30,8 +30,8 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="container mx-auto p-6 bg-white shadow-lg rounded-lg max-w-2xl mt-24 mb-12 relative min-h-[300px]">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">User Profile</h1>
+  <div class="container mx-auto p-6 shadow-lg rounded-lg max-w-2xl mt-24 mb-12 relative min-h-[300px]">
+    <h1 class="text-3xl font-bold mb-6 border-b pb-4">User Profile</h1>
 
     <div v-if="pending" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
       <div class="flex flex-col items-center space-y-4">
@@ -58,23 +58,23 @@ watchEffect(() => {
             alt="User Avatar"
             class="w-32 h-32 rounded-full object-cover border-4 border-blue-300 shadow-md"
           />
-          <h2 class="text-xl font-semibold text-gray-700 mt-4">{{ user.name }}</h2>
-          <p class="text-md text-gray-500">{{ user.email }}</p>
+          <h2 class="text-xl font-semibold  mt-4">{{ user.name }}</h2>
+          <p class="text-md ">{{ user.email }}</p>
 
           
           </div>
 
         <div class="md:col-span-2">
-          <h3 class="text-2xl font-semibold text-gray-800 mb-4">Details</h3>
+          <h3 class="text-2xl font-semibold  mb-4">Details</h3>
           
           <div class="mb-4">
-            <p class="text-gray-600 font-medium">Email:</p>
-            <p class="text-gray-800">{{ user.email }}</p>
+            <p class=" font-medium">Email:</p>
+            <p class="">{{ user.email }}</p>
           </div>
           
           <div class="mb-4">
-            <p class="text-gray-600 font-medium">User bio:</p>
-            <p class="text-gray-800">{{ user.bio }}</p>
+            <p class="font-medium">User bio:</p>
+            <p class="">{{ user.bio }}</p>
           </div>
 
           <div v-if="user.bio" class="mb-4">
