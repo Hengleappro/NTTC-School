@@ -4,7 +4,7 @@
     
     <button @click="openModal(null)" class="mt-4 mb-6 px-4 py-2 bg-blue-500 text-white rounded ml-4 hover:bg-blue-800" v-if="auth.isAdmin.value">New Course</button>
     
-    <div v-if="pending" class="text-center py-10">
+    <div v-if="pending && !showModal && !showDeleteModal" class="text-center py-10">
       <p class="text-lg text-gray-600">Loading courses...</p>
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mt-4"></div>
     </div>
@@ -100,6 +100,17 @@
         </div>
       </div>
     </div>
+
+    <div v-if="pending && !showModal && !showDeleteModal" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+      <div class="flex flex-col items-center space-y-4">
+        <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-xl font-medium text-gray-700">Loading Courses...</span>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -107,20 +118,18 @@
 import { ref } from 'vue';
 import { useAsyncData, useHead, useRuntimeConfig } from '#app';
 
-// Define a default placeholder image URL
 const DEFAULT_IMAGE_PLACEHOLDER = 'https://res.cloudinary.com/dfgegfg9c/image/upload/v1747680306/cdfbh5gywxw9dvh581v6.jpg';
 
 const { public: publicConfig } = useRuntimeConfig();
-const auth = useAuth();
+const auth = useAuth(); // Assuming useAuth provides auth.isAdmin.value
 
-// --- State Management ---
 const showModal = ref(false);
 const showDeleteModal = ref(false);
 const currentCourse = ref({
   _id: null,
   title: '',
   description: '',
-  image: DEFAULT_IMAGE_PLACEHOLDER, // Consistent default placeholder
+  image: DEFAULT_IMAGE_PLACEHOLDER,
   duration: '8 hours',
   level: 'Intermediate',
 });
@@ -128,18 +137,15 @@ const courseToDeleteId = ref(null);
 const uploadingImage = ref(false);
 const imageUploadError = ref(null);
 
-// --- Fetch Courses ---
 const { data: courses, pending, error, refresh } = await useAsyncData(
   'courses',
   () => $fetch('/api/courses')
 );
 
-// --- Head for page title ---
 useHead({
   title: 'Courses | NTTC-School'
 });
 
-// --- Image Upload Logic ---
 async function handleImageFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -165,19 +171,18 @@ async function handleImageFileSelect(event) {
   } catch (err) {
     console.error('Error uploading image:', err);
     imageUploadError.value = err.data?.statusMessage || 'Unknown error occurred during upload.';
-    currentCourse.value.image = DEFAULT_IMAGE_PLACEHOLDER; // Revert to placeholder on error
+    currentCourse.value.image = DEFAULT_IMAGE_PLACEHOLDER;
   } finally {
     uploadingImage.value = false;
   }
 }
 
-// --- Modal Actions ---
 function openModal(course) {
   currentCourse.value = course ? { ...course } : {
     _id: null,
     title: '',
     description: '',
-    image: DEFAULT_IMAGE_PLACEHOLDER, // Ensure new course gets default image
+    image: DEFAULT_IMAGE_PLACEHOLDER,
     duration: '8 hours',
     level: 'Intermediate',
   };
@@ -187,7 +192,7 @@ function openModal(course) {
 
 function closeModal() {
   showModal.value = false;
-  currentCourse.value = { // Reset currentCourse to initial state on close
+  currentCourse.value = {
     _id: null,
     title: '',
     description: '',
@@ -198,29 +203,25 @@ function closeModal() {
   imageUploadError.value = null;
 }
 
-// --- CRUD Operations ---
 async function saveCourse() {
   if (uploadingImage.value) {
     alert('Please wait for the image to finish uploading.');
     return;
   }
 
-  // Optional: Add a check if an image is provided for new courses
-  if (!currentCourse.value.image && currentCourse.value._id === null) {
+  if (!currentCourse.value.image || currentCourse.value.image === DEFAULT_IMAGE_PLACEHOLDER && currentCourse.value._id === null) {
       alert('Thumbnail image is required for a new course.');
       return;
   }
 
   try {
     if (currentCourse.value._id) {
-      // Update existing course
       await $fetch(`/api/courses/${currentCourse.value._id}`, {
         method: 'PUT',
         body: currentCourse.value,
       });
       alert('Course updated successfully!');
     } else {
-      // Add new course
       await $fetch('/api/courses', {
         method: 'POST',
         body: currentCourse.value,
@@ -228,7 +229,7 @@ async function saveCourse() {
       alert('Course added successfully!');
     }
     closeModal();
-    refresh(); // Re-fetch courses to update the list
+    refresh();
   } catch (e) {
     console.error('Error saving course:', e);
     alert('Failed to save course: ' + (e.data?.statusMessage || e.message));
@@ -248,7 +249,7 @@ async function deleteCourse() {
     alert('Course deleted successfully!');
     showDeleteModal.value = false;
     courseToDeleteId.value = null;
-    refresh(); // Re-fetch courses to update the list
+    refresh();
   } catch (e) {
     console.error('Error deleting course:', e);
     alert('Failed to delete course: ' + (e.data?.statusMessage || e.message));
@@ -257,7 +258,7 @@ async function deleteCourse() {
 </script>
 
 <style scoped>
-/* Your original CSS remains completely unchanged */
+/* Your existing styles */
 .courses-page {
   padding: 2rem;
   max-width: 1200px;
@@ -308,6 +309,19 @@ async function deleteCourse() {
 @media (max-width: 768px) {
   .course-list {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+/* New/Modified styles for the global loading overlay */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
