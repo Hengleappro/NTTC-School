@@ -1,4 +1,11 @@
 <template>
+  <div class="font-medium text-center  mb-4">
+    <h1>
+      ✍️ this is a pdf file for learning purposes
+    </h1>
+
+    <h1>✍️ Just hold and scroll for view </h1>
+  </div>
   <div class="pdf-container" v-if="pdfUrl">
     <iframe
       :src="processedPdfUrl"
@@ -11,6 +18,8 @@
   <div v-else>
     <p>No PDF URL provided.</p>
   </div>
+  <h1 class="mt-4 ">If you have any Question please <NuxtLink to="/contact" class="hover:text-blue-700 hover:underline text-red-500">click me </NuxtLink> 👇👇</h1>
+  
 </template>
 
 <script setup lang="ts">
@@ -68,7 +77,7 @@ function extractGoogleDriveFileId(url: string): string | null {
 <style scoped>
 .pdf-container {
   width: 100%;
-  height: 600px; /* Fixed height for the container, iframe will fill it */
+  height: 1200px; /* Fixed height for the container, iframe will fill it */
   min-height: 400px; /* Ensure a minimum visible area */
   position: relative; /* Needed for absolute positioning of iframe */
   background-color: #000000; /* Placeholder background */

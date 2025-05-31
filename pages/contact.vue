@@ -7,8 +7,9 @@
         <h2 class="text-2xl font-semibold mb-4 text-heading-color">Get in Touch</h2>
         <p class="mb-3"><strong>Email:</strong> mamsreymomit@gmail.com</p>
         <p class="mb-3"><strong>Phone:</strong> +855 112 232 96</p>
+        <p class="mb-3"><strong>telegram:</strong> +855 112 232 96</p>
         <p class="mb-3"><strong>Address:</strong> ផ្ទះ7C ផ្លូវបេតុង, ភូមិម័ល ខណ្ឌដង្កោ សង្កាត់សង្កោ រាជធានីភ្នំពេញ</p>
-        <p class="mb-3"><strong>Map:</strong> <a href="https://maps.app.goo.gl/iZtLdMctW7WCjAxBA" class="underline hover:text-primary-color transition-colors">Click this</a></p>
+        <p class="mb-3"><strong>Map:</strong> <a href="https://maps.app.goo.gl/iZtLdMctW7WCjAxBA" class="underline hover:text-blue-600 transition-colors">Click this</a></p>
       </div>
       
       <form class="contact-form" @submit.prevent="submitForm">

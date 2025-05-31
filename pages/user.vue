@@ -1,5 +1,6 @@
 <template>
-  <div class="user-management min-h-screen pt-12 pb-10 md:pt-24"> <div class="container mx-auto px-4 py-8">
+  <div class="user-management min-h-screen pt-12 pb-10 md:pt-24">
+    <div class="container mx-auto px-4 py-8">
       <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
         <h1 class="text-3xl font-bold ">User Management</h1>
         <button
@@ -87,6 +88,18 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             ></textarea>
           </div>
+
+          <div>
+            <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
+            <input
+              type="url"
+              id="avatar"
+              v-model="userForm.avatar"
+              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://example.com/your-avatar.jpg"
+            />
+            <p class="mt-1 text-xs text-gray-500">Provide a direct link to the user's avatar image.</p>
+          </div>
           
           <div class="flex justify-end space-x-3 pt-4">
             <button
@@ -114,8 +127,16 @@
           :key="user.id" 
           class="user-card flex flex-col sm:flex-row items-start p-4 sm:p-5 rounded-lg bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-200"
         >
-          <div class="user-avatar flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full mr-0 sm:mr-4 mb-3 sm:mb-0 text-lg font-semibold bg-blue-100 text-blue-600">
-            {{ user.name.charAt(0).toUpperCase() }}
+          <div class="user-avatar flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full mr-0 sm:mr-4 mb-3 sm:mb-0 text-lg font-semibold bg-blue-100 text-blue-600 overflow-hidden">
+            <img
+              v-if="user.avatar && user.avatar.startsWith('http')"
+              :src="user.avatar"
+              :alt="user.name"
+              class="w-full h-full object-cover"
+            />
+            <span v-else>
+              {{ user.name.charAt(0).toUpperCase() }}
+            </span>
           </div>
           
           <div class="user-info flex-1 w-full">
@@ -225,16 +246,6 @@
 </template>
 
 <script setup>
-// Note regarding "SyntaxError: Cannot use import statement outside a module":
-// The ES module 'import' statements used below (e.g., from 'vue') are standard for Nuxt 3 and Vue 3.
-// This type of error typically originates from the Node.js environment or project configuration,
-// not from the Vue component code itself.
-// Common checks:
-// 1. Ensure your project's package.json contains "type": "module", or that Nuxt is handling module types correctly.
-// 2. Verify your Node.js version is compatible with Nuxt 3 (v16.11+ recommended, LTS versions like 18.x or 20.x are best).
-// 3. Ensure server-side files (e.g., in server/api or server/utils) are not being run directly by 'node' in a CommonJS context.
-//    Nuxt's development server and build process handle the execution of these files.
-// 4. Restart your Nuxt development server after making changes to server files or project configuration.
 import { ref, onMounted, computed } from 'vue';
 
 // User data model for the form
@@ -244,23 +255,22 @@ const userForm = ref({
   email: '',
   password: '', // Only send if changing/creating
   role: 'user',
-  bio: ''
+  bio: '',
+  avatar: '', // NEW: Add avatar to userForm
 });
 
 const users = ref([]);
 const isEditMode = ref(false);
 const showForm = ref(false);
 const showDeleteModal = ref(false);
-const userToDelete = ref(null); // Will store the full user object to delete
+const userToDelete = ref(null); 
 const apiErrors = ref([]); 
-const isLoading = ref(false); // For loading indicators
+const isLoading = ref(false);
 
-// Computed property for form title
 const formTitle = computed(() => {
   return isEditMode.value ? 'Edit User Details' : 'Create New User';
 });
 
-// Show create form
 const showCreateForm = () => {
   resetForm();
   isEditMode.value = false;
@@ -273,12 +283,12 @@ const fetchUsers = async () => {
   isLoading.value = true;
   apiErrors.value = [];
   try {
-    // GET /api/auth is expected to return an array of users
-    const fetchedUsers = await $fetch('/api/auth'); // UPDATED PATH
-    users.value = fetchedUsers || []; // Ensure it's an array
+    // UPDATED PATH: Ensure this endpoint also returns the 'avatar' field for each user
+    const fetchedUsers = await $fetch('/api/auth'); 
+    users.value = fetchedUsers || []; 
   } catch (error) {
     console.error('Error fetching users:', error);
-    users.value = []; // Clear users on error
+    users.value = []; 
     const errorMessage = error.data?.statusMessage || error.message || 'Failed to load users. Please check your connection or try again.';
     apiErrors.value.push(errorMessage);
   } finally {
@@ -286,7 +296,6 @@ const fetchUsers = async () => {
   }
 };
 
-// Submit form (create or update)
 const submitForm = async () => {
   apiErrors.value = []; 
 
@@ -301,6 +310,10 @@ const submitForm = async () => {
   if (userForm.value.password && userForm.value.password.length < 6) {
     apiErrors.value.push("Password must be at least 6 characters.");
   }
+  // NEW: Basic avatar URL validation for the form
+  if (userForm.value.avatar && !userForm.value.avatar.startsWith('http')) {
+    apiErrors.value.push("Avatar URL must be a valid http/https URL.");
+  }
 
   if (apiErrors.value.length > 0) return; 
 
@@ -312,6 +325,7 @@ const submitForm = async () => {
       email: userForm.value.email.toLowerCase(), 
       role: userForm.value.role,
       bio: userForm.value.bio,
+      avatar: userForm.value.avatar, // NEW: Include avatar in payload
     };
     if (userForm.value.password) { 
       payload.password = userForm.value.password;
@@ -319,14 +333,16 @@ const submitForm = async () => {
 
     if (isEditMode.value) {
       console.log('Attempting to update user:', userForm.value.id, payload);
-      response = await $fetch(`/api/auth/${userForm.value.id}`, { // UPDATED PATH
+      // Ensure backend /api/auth/:id (PUT) accepts and saves 'avatar'
+      response = await $fetch(`/api/auth/${userForm.value.id}`, { 
         method: 'PUT',
         body: payload
       });
       console.log('User updated:', response.user);
     } else {
       console.log('Attempting to create user:', payload);
-      response = await $fetch('/api/auth', { // UPDATED PATH
+      // Ensure backend /api/auth (POST) accepts and saves 'avatar'
+      response = await $fetch('/api/auth', { 
         method: 'POST',
         body: payload
       });
@@ -354,7 +370,8 @@ const editUser = (userToEdit) => {
     email: userToEdit.email,
     password: '', 
     role: userToEdit.role,
-    bio: userToEdit.bio || ''
+    bio: userToEdit.bio || '',
+    avatar: userToEdit.avatar || '', // NEW: Populate avatar field for editing
   };
   isEditMode.value = true;
   showForm.value = true;
@@ -375,7 +392,8 @@ const resetForm = () => {
     email: '',
     password: '',
     role: 'user',
-    bio: ''
+    bio: '',
+    avatar: '', // NEW: Reset avatar field
   };
   isEditMode.value = false; 
 };
@@ -395,7 +413,7 @@ const deleteUser = async () => {
   apiErrors.value = [];
   try {
     console.log('Deleting user:', userToDelete.value.id);
-    await $fetch(`/api/auth/${userToDelete.value.id}`, { // UPDATED PATH
+    await $fetch(`/api/auth/${userToDelete.value.id}`, { 
       method: 'DELETE'
     });
     console.log('User deleted successfully');
@@ -432,7 +450,7 @@ textarea {
   transition: opacity 0.3s ease-out;
 }
 .fixed.inset-0.bg-gray-800 > div { 
-   transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
 }
 
 .animate-spin {
