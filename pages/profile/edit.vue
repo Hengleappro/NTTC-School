@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import type { IUser, AuthApiResponse } from '~/types'; // Adjust path if your types are elsewhere
+// Ensure your IUser type has an 'avatar' property
+import type { IUser, AuthApiResponse } from '~/server/models/User.ts'; 
 
 const router = useRouter();
 
@@ -16,7 +17,7 @@ const { data: userData, pending, error, refresh } = await useFetch<IUser | AuthA
 const name = ref('');
 const email = ref('');
 const bio = ref('');
-const avatarUrl = ref('');
+const avatarUrl = ref(''); // Keep this name for the form input v-model
 
 // Watch for changes in userData and populate form fields
 watch(userData, (newVal) => {
@@ -24,7 +25,8 @@ watch(userData, (newVal) => {
     name.value = newVal.name || '';
     email.value = newVal.email || '';
     bio.value = newVal.bio || '';
-    avatarUrl.value = newVal.avatarUrl || '';
+    // IMPORTANT: Use newVal.avatar here to match your IUser type/backend model
+    avatarUrl.value = (newVal as IUser).avatar || ''; 
   }
 }, { immediate: true }); // Run immediately on component mount
 
@@ -55,14 +57,15 @@ async function handleUpdateProfile() {
       name: name.value,
       email: email.value,
       bio: bio.value,
-      avatarUrl: avatarUrl.value,
+      // IMPORTANT: Send the avatar data under the 'avatar' key to match backend
+      avatar: avatarUrl.value, 
       // You might also include the ID if your API requires it for identification
       id: isUserLoaded.value ? (userData.value as IUser).id : undefined
     };
 
     // Use $fetch for the POST/PUT request to update the profile
-    // Assuming your API endpoint for updating a profile is /api/auth/profile or /api/auth/me
-    const response = await $fetch<IUser>('/api/auth/profile', { // Or '/api/auth/me' if it handles PUT
+    // Assuming your API endpoint for updating a profile is /api/auth/profile
+    const response = await $fetch<IUser>('/api/auth/profile', { // This endpoint should handle PUT/PATCH
       method: 'PUT', // Or 'PATCH' depending on your API
       body: updatedProfile,
       // headers: {

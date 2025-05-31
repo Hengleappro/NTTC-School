@@ -37,10 +37,6 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxtjs/google-fonts',
     '@nuxt/icon',
-    // Removed @nuxtjs/cloudinary if you're handling uploads manually via server/api/upload.
-    // If you intend to use the @nuxtjs/cloudinary module for its specific features,
-    // you would install it and add it here, and configure it through its own options.
-    // For now, based on your server/api/upload, you are handling it manually.
   ],
 
   // Configure Nitro plugins - this is where your MongoDB connection plugin lives

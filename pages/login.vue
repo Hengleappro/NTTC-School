@@ -2,7 +2,8 @@
   <div
     class="min-h-screen flex items-center justify-center bg-cover bg-center"
     :style="{ backgroundImage: 'url(/background.jpg)' }"
-  > <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+  >
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
 
     <div class="relative w-full max-w-md px-4">
       <div class="bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 shadow-xl overflow-hidden">
@@ -16,7 +17,7 @@
 
             <div>
               <label for="email" class="block text-sm font-medium text-white mb-2">
-                Email address
+                Email
               </label>
               <input
                 id="email"
@@ -37,9 +38,6 @@
                 <label for="password" class="block text-sm font-medium text-white">
                   Password
                 </label>
-                <NuxtLink to="/forgot-password" class="text-sm text-blue-300 hover:text-blue-200">
-                  Forgot password?
-                </NuxtLink>
               </div>
               <input
                 id="password"
@@ -50,24 +48,26 @@
                 class="w-full px-4 py-3 rounded-lg bg-white/90 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                 placeholder="••••••••"
               />
+              <NuxtLink to="/forgot-password" class="text-sm text-blue-500 hover:text-blue-200">
+                Forgot password?
+              </NuxtLink>
+              
               <p v-if="errors.password" class="mt-2 text-sm text-red-300">
                 {{ errors.password }}
               </p>
             </div>
-
-            <div>
-              <button
-                type="submit"
-                :disabled="loading"
-                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <span v-if="!loading">Sign in</span>
-                <svg v-else class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </button>
-            </div>
+            
+            <button
+              type="submit"
+              :disabled="loading"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <span v-if="!loading">Sign in</span>
+              <svg v-else class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </button>
           </form>
 
           <div class="mt-6">
@@ -113,17 +113,15 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
-// navigateTo is auto-imported in Nuxt 3
-// useHead is auto-imported for managing <head> elements
 
-// Define page meta for title
 useHead({
   title: 'Login - NTTC School',
 });
 
-const form = reactive({ // Using reactive for a nested object like form is often cleaner
+const form = reactive({
   email: '',
   password: '',
+  // avatarUrl removed
 });
 
 const errors = reactive({
@@ -135,7 +133,6 @@ const errors = reactive({
 const loading = ref(false);
 
 const validateForm = () => {
-  // Reset previous errors
   errors.email = null;
   errors.password = null;
   errors.apiError = null;
@@ -158,7 +155,7 @@ const submitLogin = async () => {
   }
 
   loading.value = true;
-  errors.apiError = null; // Clear previous general API error
+  errors.apiError = null;
 
   try {
     const response = await $fetch('/api/auth/login', {
@@ -166,47 +163,31 @@ const submitLogin = async () => {
       body: {
         email: form.email,
         password: form.password,
+        // avatar removed from payload
       },
     });
 
     console.log('Login successful:', response.message, response.user);
 
-    // --- Crucial Next Step: State Management ---
-    // 1. You need an authentication store (e.g., using Pinia).
-    //    Example: const authStore = useAuthStore();
-    //             authStore.login(response.user); // This action would set isAuthenticated = true and store user details.
-
-    // 2. For now, as a placeholder, you could store a simple flag or user info.
-    //    This is NOT a complete solution for auth state.
-    //    const loggedInUser = useState('loggedInUser', () => null); // Nuxt 3 shared state
-    //    loggedInUser.value = response.user;
-
-    // Redirect to a protected page (e.g., dashboard)
-    // Ensure you have a `pages/dashboard.vue` file.
-    await navigateTo('/'); // Changed from '/' to '/dashboard'
+    await navigateTo('/');
 
   } catch (err) {
     console.error('Login error details:', err);
     loading.value = false;
 
-    // Error handling for $fetch errors
     if (err.response && err.response._data) {
       errors.apiError = err.response._data.statusMessage || err.response._data.message || 'Invalid credentials or server error.';
-    } else if (err.data) { // Sometimes error details are in err.data
+    } else if (err.data) {
       errors.apiError = err.data.statusMessage || err.data.message || 'Invalid credentials or server error.';
-    }
-    else {
+    } else {
       errors.apiError = 'An unexpected error occurred. Please try again.';
     }
   }
-  // No need to set loading.value = false here if successful, as it redirects.
-  // It's already set in the catch block.
 };
 
 const handleSocialLogin = (provider) => {
   console.log(`Attempting to log in with ${provider}`);
   alert(`Social login with ${provider} is not implemented yet.`);
-  // Example: window.location.href = `/api/auth/${provider}/redirect`;
 };
 </script>
 

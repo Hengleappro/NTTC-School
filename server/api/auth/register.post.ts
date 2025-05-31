@@ -1,16 +1,20 @@
 // server/api/auth/register.post.ts
 import { defineEventHandler, readBody, createError } from 'h3';
 import User, { IUser } from '~/server/models/User'; // Adjust path if your models folder is different
+// Assuming connectDB() is globally handled or you call it explicitly here:
+// import { connectDB } from '~/server/utils/mongoose'; 
 
 export default defineEventHandler(async (event) => {
   // Ensure the database connection is established.
   // This might be handled by a server plugin (e.g., server/plugins/mongodb.ts)
   // If not, you might need to explicitly call your connectDB() utility here.
   // For now, we assume the plugin handles the connection.
+  // await connectDB(); // Uncomment if you need to call it here
 
   const body = await readBody(event);
 
-  const { name, email, password, role, bio } = body; // Role and bio are optional for basic registration
+  // Destructure the new 'avatar' field along with existing ones
+  const { name, email, password, role, bio, avatar } = body; 
 
   // --- Basic Input Validation ---
   if (!name || !email || !password) {
@@ -55,18 +59,19 @@ export default defineEventHandler(async (event) => {
       password,
       role: role || 'user', // Default to 'user' if no role is provided
       bio: bio || '',
+      avatar: avatar || '', // NEW: Save the avatar field, default to empty string if not provided
     });
 
     await newUser.save();
 
     // --- Prepare response (don't send back the password) ---
-    // Mongoose's toObject() or toJSON() with schema transforms can also handle this
     const userResponse = {
-      id: newUser._id,
+      id: newUser._id.toString(), // Ensure _id is converted to string for frontend
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
       bio: newUser.bio,
+      avatar: newUser.avatar, // NEW: Include avatar in the response
       createdAt: newUser.createdAt,
     };
 
@@ -78,16 +83,12 @@ export default defineEventHandler(async (event) => {
     };
 
   } catch (error: any) {
-    // Handle Mongoose validation errors or other errors
     if (error.statusCode) { // If it's an error we created with createError
       throw error;
     }
-    // Log the actual error for debugging on the server
     console.error('Registration Error:', error);
 
-    // For Mongoose validation errors, you might want to be more specific
     if (error.name === 'ValidationError') {
-        // Extract specific validation messages if desired
         const messages = Object.values(error.errors).map((err: any) => err.message).join(', ');
         throw createError({
             statusCode: 400,

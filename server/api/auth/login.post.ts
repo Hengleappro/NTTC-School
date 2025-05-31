@@ -1,14 +1,13 @@
 // server/api/auth/login.post.ts
 import { defineEventHandler, readBody, createError, setCookie } from 'h3';
 import User, { IUser } from '~/server/models/User'; // Adjust path if needed
-// For generating a more secure session ID if you're not using an auth library yet
-// import { randomBytes } from 'crypto';
 
 export default defineEventHandler(async (event) => {
   // We assume the MongoDB connection is handled by a plugin.
 
   const body = await readBody(event);
-  const { email, password } = body;
+  // Destructure 'avatar' along with email and password
+  const { email, password, avatar } = body; 
 
   // --- Basic Input Validation ---
   if (!email || !password) {
@@ -41,7 +40,25 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // --- Password Matched: Handle Session/Token ---
+    // --- Password Matched: Handle Session/Token and Avatar Update ---
+
+    // Option 1: Update avatar if provided in the login request
+    // This is generally NOT recommended for a login endpoint as it can lead to
+    // unexpected overwrites or unnecessary database writes on every login.
+    // It's usually better to handle avatar updates on a profile edit page.
+    if (avatar && typeof avatar === 'string' && avatar.trim().length > 0) {
+      // Basic URL validation (you might want a more robust regex or a dedicated validation library)
+      if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+        user.avatar = avatar;
+        await user.save(); // Save the user with the updated avatar
+        console.log(`User ${user.email} avatar updated during login.`);
+      } else {
+        console.warn(`Invalid avatar URL provided for user ${user.email} during login: ${avatar}`);
+        // You might choose to throw an error here, or just ignore the invalid URL
+      }
+    }
+
+
     // This is a crucial part. For a real application, you'd typically:
     // 1. Generate a secure session token (e.g., using JWT or a random string).
     // 2. Store session information on the server-side (e.g., in Redis, or a sessions collection in MongoDB)
@@ -70,7 +87,9 @@ export default defineEventHandler(async (event) => {
       email: user.email,
       role: user.role,
       bio: user.bio,
+      avatar: user.avatar, // <--- INCLUDE AVATAR IN THE RESPONSE
       createdAt: user.createdAt,
+      updatedAt: user.updatedAt, // Include updatedAt if your schema has it
     };
 
     return {

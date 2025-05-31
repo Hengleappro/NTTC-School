@@ -1,8 +1,9 @@
 <template>
   <div
     class="min-h-screen flex items-center justify-center bg-cover bg-center"
-    :style="{ backgroundImage: 'url(/background.jpg)' }"  
-  > <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+    :style="{ backgroundImage: 'url(/background.jpg)' }"
+  >
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
     
     <div class="relative w-full max-w-md px-4">
       <div class="bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 shadow-xl overflow-hidden">
@@ -78,6 +79,19 @@
               >
             </div>
 
+            <div>
+              <label for="avatar" class="block text-sm font-medium text-white mb-2">
+                Avatar URL (Optional)
+              </label>
+              <input
+                id="avatar"
+                v-model="form.avatar"
+                type="url"
+                placeholder="https://example.com/your-avatar.jpg"
+                class="w-full px-4 py-3 rounded-lg bg-white/90 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+              >
+              <p class="mt-1 text-xs text-gray-300">Paste a direct link to your profile picture.</p>
+            </div>
             <div class="pt-2">
               <button
                 type="submit"
@@ -106,91 +120,92 @@
   </div>
 </template>
 
-<script setup> // Changed to script setup for better Nuxt 3 Composition API experience
-import { ref } from 'vue';
-// import { useRouter } from 'vue-router'; // Not needed if using navigateTo
-// navigateTo is auto-imported in Nuxt 3 <script setup>
+<script setup>
+import { ref, reactive } from 'vue';
 
-// const router = useRouter(); // Not typically used for navigation this way in <script setup> with navigateTo
+useHead({
+  title: 'Create Account - NTTC School', // Changed title for consistency
+});
 
-const form = ref({
+const form = reactive({
   name: '',
   email: '',
   password: '',
-  password_confirmation: '', // This field is for client-side check only
+  password_confirmation: '',
+  avatar: '', // NEW: Add avatar field to form
 });
 
-const errors = ref([]); // Will store error messages as strings
+const errors = ref([]);
 const loading = ref(false);
 
 const submitForm = async () => {
-  errors.value = []; // Clear previous errors
+  errors.value = [];
   loading.value = true;
 
   // Client-side validation
-  if (form.value.password !== form.value.password_confirmation) {
+  if (form.password !== form.password_confirmation) {
     errors.value.push('Passwords do not match.');
     loading.value = false;
     return;
   }
-
-  // Backend validation for password length is 6, but your form says 8.
-  // Let's align or keep client-side more strict.
-  // The backend User model has minlength: 6 for password.
-  if (form.value.password.length < 6) { 
+  if (form.password.length < 6) { 
     errors.value.push('Password must be at least 6 characters.');
     loading.value = false;
     return;
   }
-  if (!form.value.name.trim()) {
+  if (!form.name.trim()) {
     errors.value.push('Full Name is required.');
     loading.value = false;
     return;
   }
-  if (!form.value.email.includes('@')) { // Simple email check
+  if (!form.email.includes('@')) {
     errors.value.push('Please enter a valid email address.');
     loading.value = false;
     return;
   }
+  // Optional: Basic avatar URL validation
+  if (form.avatar && !/^https?:\/\/.+/.test(form.avatar)) { // Very basic check for http/https
+    errors.value.push('Please enter a valid URL for your avatar.');
+    loading.value = false;
+    return;
+  }
+
 
   try {
-    // Use $fetch for API calls in Nuxt 3
     const response = await $fetch('/api/auth/register', {
       method: 'POST',
       body: {
-        name: form.value.name,
-        email: form.value.email,
-        password: form.value.password,
-        // You could also send role or bio if your form collected them,
-        // but your current form only has name, email, password.
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        avatar: form.avatar, // NEW: Include avatar in the payload
       },
     });
 
     console.log('Registration successful:', response.message, response.user);
 
-    // Redirect to login page after successful registration (or directly to dashboard if you auto-login)
-    // For now, let's redirect to login and they can sign in.
-    await navigateTo('/login?registered=true'); // navigateTo is auto-imported in <script setup>
+    await navigateTo('/login?registered=true');
 
   } catch (error) {
     console.error('Registration error object:', error);
     loading.value = false;
 
     if (error.response && error.response._data && error.response._data.statusMessage) {
-      // Handle errors from our backend (createError)
       errors.value.push(error.response._data.statusMessage);
-    } else if (error.data && error.data.statusMessage) { // Another common structure for $fetch errors
-        errors.value.push(error.data.statusMessage);
+    } else if (error.data && error.data.statusMessage) {
+      errors.value.push(error.data.statusMessage);
     }
     else {
       errors.value.push('An unexpected error occurred. Please try again.');
     }
   } finally {
-    // Ensure loading is set to false if not already handled by error or success redirect.
-    // This is mostly for cases where an error occurs before the API call.
     if (errors.value.length > 0) {
         loading.value = false;
     }
   }
 };
 </script>
+
+<style scoped>
+/* Your component-specific styles can go here if needed */
+</style>

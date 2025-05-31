@@ -1,6 +1,6 @@
 // server/api/auth/me.get.ts
 import { defineEventHandler, getCookie, createError, deleteCookie } from 'h3';
-import User from '~/server/models/User'; // Adjust path if your models folder is different
+import User from '~/server/models/User'; // Your User model
 
 // --- IMPORTANT SECURITY NOTE ---
 // The `decodeSessionId` function below is a SIMPLIFIED and INSECURE placeholder
@@ -99,8 +99,9 @@ export default defineEventHandler(async (event) => {
       email: user.email,
       role: user.role,
       bio: user.bio,
-      // Add any other fields your frontend needs to manage the user's state.
-      // For example: profileImageUrl, preferences, etc.
+      avatar: user.avatar, // <--- ADDED: Include the avatar field here
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt, // Assuming your schema has this
     };
 
   } catch (error: any) {
