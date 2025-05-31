@@ -57,10 +57,6 @@
           </div>
           
           <div class="mb-4">
-            <label class="block mb-2 text-gray-600">Image Upload</label>
-            <input type="file" @change="handleImageFileSelect" accept="image/*" class="w-full p-2 border rounded">
-            <p v-if="imageUploadError" class="text-red-500 text-sm mt-1">{{ imageUploadError }}</p>
-            <div v-if="uploadingImage" class="text-sm text-gray-500 mt-1">Uploading image...</div>
             
             <label class="block mb-2 text-gray-600 mt-4">Image URL (or use uploaded)</label>
             <img v-if="currentCourse.image" :src="currentCourse.image" class="w-32 h-32 object-cover rounded-md mb-2">
