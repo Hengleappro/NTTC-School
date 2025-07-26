@@ -10,7 +10,7 @@
           <h4>Quick Links</h4>
           <NuxtLink to="/">Home</NuxtLink>
           <NuxtLink to="/about">About</NuxtLink>
-          <NuxtLink to="/course">Courses</NuxtLink>
+          <NuxtLink to="/courses">Courses</NuxtLink>
           <NuxtLink to="/contact">Contact</NuxtLink>
         </div>
         <div class="footer-section">

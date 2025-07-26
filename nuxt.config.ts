@@ -38,6 +38,21 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxt/icon',
   ],
+  googleFonts: {
+    families: {
+      Roboto: true, // Example: include Roboto font
+      'Open Sans': [400, 700], // Example: include Open Sans with specific weights
+      'Lato': {
+        wght: [100, 300, 400, 700, 900],
+        ital: [100, 300, 400, 700, 900],
+      },
+      // Add more fonts as needed
+    },
+    display: 'swap', // Recommended: 'swap' or 'block' for performance
+    // You can also specify other options like `subsets`, `text`, `prefetch`, etc.
+    // For more details, refer to the module's documentation:
+    // https://google-fonts.nuxtjs.org/getting-started/setup
+  },
 
   // Configure Nitro plugins - this is where your MongoDB connection plugin lives
   nitro: {

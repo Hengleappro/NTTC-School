@@ -5,7 +5,7 @@ export interface User {
   email: string
   password: string
   username?: string
-  role?: 'student' | 'instructor' | 'admin'
+  role?: 'user' | 'admin'
   isVerified?: boolean
   createdAt?: Date
   updatedAt?: Date
