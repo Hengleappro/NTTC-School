@@ -1,12 +1,12 @@
 <template>
   <div
     class="min-h-screen flex items-center justify-center bg-cover bg-center"
-    :style="{ backgroundImage: 'url(/background.jpg)' }"
+    :style="{ backgroundImage: 'url(https://res.cloudinary.com/dfgegfg9c/image/upload/v1747697656/stxkgrtvsxd2iyh2cxw9.jpg)' }"
   >
     <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
 
     <div class="relative w-full max-w-md px-4">
-      <div class="bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 shadow-xl overflow-hidden">
+      <div class="bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 shadow-xl overflow-hidden mt-10">
         <div class="p-8">
           <h1 class="text-3xl font-bold text-center text-white mb-8">Login</h1>
 
