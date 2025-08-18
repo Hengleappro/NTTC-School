@@ -77,5 +77,6 @@ const currentYear = new Date().getFullYear();
   border-top: 1px solid #34495e;
   padding-top: 1rem;
   text-align: center;
+  margin-bottom: 1rem;
 }
 </style>
