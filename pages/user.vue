@@ -88,18 +88,6 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             ></textarea>
           </div>
-
-          <div>
-            <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
-            <input
-              type="url"
-              id="avatar"
-              v-model="userForm.avatar"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://example.com/your-avatar.jpg"
-            />
-            <p class="mt-1 text-xs text-gray-500">Provide a direct link to the user's avatar image.</p>
-          </div>
           
           <div class="flex justify-end space-x-3 pt-4">
             <button
